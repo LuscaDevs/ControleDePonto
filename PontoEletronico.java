@@ -48,14 +48,40 @@ public class PontoEletronico {
         btnCadastrarUsuario.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String nomeUsuario = JOptionPane.showInputDialog(frame, "Digite o nome do usuário:");
-                if (nomeUsuario != null && !nomeUsuario.isEmpty()) {
-                    String matriculaUsuario = JOptionPane.showInputDialog(frame, "Digite a matrícula do usuário:");
-                    if (matriculaUsuario != null && !matriculaUsuario.isEmpty()) {
-                        cadastrarUsuario(nomeUsuario, matriculaUsuario);
-                        JOptionPane.showMessageDialog(frame, "Usuário cadastrado com sucesso!");
-                        atualizarExibicaoUsuarios(painelUsuarios);
-                    }
+
+                if (nomeUsuario == null || nomeUsuario.isBlank()) {
+                    JOptionPane.showMessageDialog(frame, "Por favor, informe o nome do usuário.");
+                    return;
                 }
+
+                String matriculaUsuario = JOptionPane.showInputDialog(frame, "Digite a matrícula do usuário:");
+
+                if (matriculaUsuario == null || matriculaUsuario.isBlank()) {
+                    JOptionPane.showMessageDialog(frame, "Por favor, informe a matrícula do usuário.");
+                    return;
+                }
+
+                cadastrarUsuario(nomeUsuario, matriculaUsuario);
+                JOptionPane.showMessageDialog(frame, "Usuário cadastrado com sucesso!");
+                atualizarExibicaoUsuarios(painelUsuarios);
+            }
+
+        });
+
+        // Botão para deletar usuário
+        JButton btnDeletarUsuario = new JButton("Deletar usuário");
+        btnDeletarUsuario.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (usuarios.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Não há usuários cadastrados.");
+                    return;
+                }
+
+                Usuario usuarioSelecionado = obterUsuario();
+                usuarios.remove(usuarioSelecionado);
+                JOptionPane.showMessageDialog(frame, "Usuário deletado com sucesso!");
+                atualizarExibicaoUsuarios(painelUsuarios);
             }
         });
 
@@ -108,10 +134,10 @@ public class PontoEletronico {
         });
 
         // Adicionar os botões ao painel principal
-        // Adicionar os botões ao painel principal
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new FlowLayout());
         painelBotoes.add(btnCadastrarUsuario);
+        painelBotoes.add(btnDeletarUsuario);
         painelBotoes.add(btnEntrada);
         painelBotoes.add(btnSaida);
 
@@ -126,6 +152,10 @@ public class PontoEletronico {
     public void cadastrarUsuario(String nomeUsuario, String matriculaUsuario) {
         Usuario usuario = new Usuario(nomeUsuario, matriculaUsuario);
         usuarios.add(usuario);
+    }
+
+    public void deletarUsuario(Usuario usuario) {
+        usuarios.remove(usuario);
     }
 
     private void atualizarExibicaoUsuarios(JPanel painelUsuarios) {
