@@ -31,6 +31,18 @@ public class PontoEletronico {
         JPanel painelPontos = new JPanel();
         painelPontos.setLayout(new BoxLayout(painelPontos, BoxLayout.Y_AXIS));
 
+        // Criar o painel de abas
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Painel para exibição dos usuários cadastrados
+        JPanel painelUsuarios = new JPanel();
+        painelUsuarios.setLayout(new BoxLayout(painelUsuarios, BoxLayout.Y_AXIS));
+
+        // Adicionar o painel de pontos à aba "Pontos"
+        tabbedPane.addTab("Pontos", painelPontos);
+
+        // Adicionar o painel de usuários à aba "Usuários cadastrados"
+        tabbedPane.addTab("Usuários cadastrados", painelUsuarios);
         // Botão para cadastrar usuário
         JButton btnCadastrarUsuario = new JButton("Cadastrar Usuário");
         btnCadastrarUsuario.addActionListener(new ActionListener() {
@@ -41,6 +53,7 @@ public class PontoEletronico {
                     if (matriculaUsuario != null && !matriculaUsuario.isEmpty()) {
                         cadastrarUsuario(nomeUsuario, matriculaUsuario);
                         JOptionPane.showMessageDialog(frame, "Usuário cadastrado com sucesso!");
+                        atualizarExibicaoUsuarios(painelUsuarios);
                     }
                 }
             }
@@ -95,15 +108,16 @@ public class PontoEletronico {
         });
 
         // Adicionar os botões ao painel principal
+        // Adicionar os botões ao painel principal
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new FlowLayout());
         painelBotoes.add(btnCadastrarUsuario);
         painelBotoes.add(btnEntrada);
         painelBotoes.add(btnSaida);
 
-        // Adicionar os painéis ao frame
+        // Adicionar os componentes ao frame
         frame.add(painelBotoes, BorderLayout.NORTH);
-        frame.add(new JScrollPane(painelPontos), BorderLayout.CENTER);
+        frame.add(tabbedPane, BorderLayout.CENTER);
 
         // Exibir a janela
         frame.setVisible(true);
@@ -114,12 +128,24 @@ public class PontoEletronico {
         usuarios.add(usuario);
     }
 
-    public Usuario obterUsuario() {
-        Usuario[] opcoes = usuarios.toArray(new Usuario[0]);
-        if (opcoes.length > 0) {
-            return (Usuario) JOptionPane.showInputDialog(null, "Selecione o usuário:", "Selecionar Usuário",
-                    JOptionPane.QUESTION_MESSAGE, null, opcoes, opcoes[0]);
+    private void atualizarExibicaoUsuarios(JPanel painelUsuarios) {
+        painelUsuarios.removeAll();
+        for (Usuario usuario : usuarios) {
+            painelUsuarios.add(new JLabel(usuario.toString()));
+        }
+        painelUsuarios.revalidate();
+        painelUsuarios.repaint();
+    }
+
+    private Usuario obterUsuario() {
+        Object[] usuariosArray = usuarios.toArray();
+        if (usuariosArray.length > 0) {
+            Usuario usuarioSelecionado = (Usuario) JOptionPane.showInputDialog(null, "Selecione o usuário:",
+                    "Selecionar Usuário", JOptionPane.QUESTION_MESSAGE, null, usuariosArray, usuariosArray[0]);
+            return usuarioSelecionado;
         } else {
+            JOptionPane.showMessageDialog(null,
+                    "Não há usuários cadastrados. Por favor, cadastre um usuário primeiro.");
             return null;
         }
     }
