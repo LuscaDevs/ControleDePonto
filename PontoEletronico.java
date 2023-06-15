@@ -62,7 +62,6 @@ public class PontoEletronico {
                 }
 
                 cadastrarUsuario(nomeUsuario, matriculaUsuario);
-                JOptionPane.showMessageDialog(frame, "Usuário cadastrado com sucesso!");
                 atualizarExibicaoUsuarios(painelUsuarios);
             }
 
@@ -85,51 +84,61 @@ public class PontoEletronico {
             }
         });
 
-        // Botão para registrar ponto de entrada
-        JButton btnEntrada = new JButton("Registrar Entrada");
-        btnEntrada.addActionListener(new ActionListener() {
+        // Botão para registrar ponto de entrada ou saída
+        JButton btnRegistrar = new JButton("Registrar Ponto");
+        btnRegistrar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (usuarios.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame,
-                            "Não há usuários cadastrados. Por favor, cadastre um usuário primeiro.");
-                    return;
-                }
-
                 // Obter a data e hora atual
                 LocalDateTime dateTimeAtual = LocalDateTime.now();
                 String dataHora = dateTimeAtual.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
-                Usuario usuarioSelecionado = obterUsuario();
-                if (usuarioSelecionado != null) {
-                    registrarPonto("Entrada", dataHora, usuarioSelecionado);
-                    JOptionPane.showMessageDialog(frame,
-                            "Ponto de entrada registrado para o usuário: " + usuarioSelecionado.getNome());
-                    atualizarExibicaoPontos(painelPontos);
-                }
-            }
-        });
+                // Obter o usuário para registro do ponto
+                String matriculaUsuario = JOptionPane.showInputDialog(frame, "Digite a matrícula do usuário:");
 
-        // Botão para registrar ponto de saída
-        JButton btnSaida = new JButton("Registrar Saída");
-        btnSaida.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (usuarios.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame,
-                            "Não há usuários cadastrados. Por favor, cadastre um usuário primeiro.");
+                // Verificar se o usuário existe
+                Usuario usuarioEncontrado = null;
+                for (Usuario u : usuarios) {
+                    if (u.getMatricula().equals(matriculaUsuario)) {
+                        usuarioEncontrado = u;
+                        break;
+                    }
+                }
+
+                final Usuario usuario = usuarioEncontrado;
+
+                if (usuario == null) {
+                    JOptionPane.showMessageDialog(frame, "Usuário não encontrado.");
                     return;
                 }
 
-                // Obter a data e hora atual
-                LocalDateTime dateTimeAtual = LocalDateTime.now();
-                String dataHora = dateTimeAtual.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                // Verificar o tipo de ponto a ser registrado
+                String tipoPonto = "";
 
-                Usuario usuarioSelecionado = obterUsuario();
-                if (usuarioSelecionado != null) {
-                    registrarPonto("Saída", dataHora, usuarioSelecionado);
-                    JOptionPane.showMessageDialog(frame,
-                            "Ponto de saída registrado para o usuário: " + usuarioSelecionado.getNome());
-                    atualizarExibicaoPontos(painelPontos);
+                // Verificar se o usuário já possui registro de entrada
+                boolean possuiEntrada = pontos.stream()
+                        .anyMatch(ponto -> ponto.getUsuario().equals(usuario) && ponto.getTipo().equals("Entrada"));
+
+                // Verificar se o usuário já possui registro de saída
+                boolean possuiSaida = pontos.stream()
+                        .anyMatch(ponto -> ponto.getUsuario().equals(usuario) && ponto.getTipo().equals("Saída"));
+
+                // Determinar o tipo de ponto a ser registrado
+                if (!possuiEntrada && !possuiSaida) {
+                    tipoPonto = "Entrada";
+                } else if (possuiEntrada && !possuiSaida) {
+                    tipoPonto = "Saída";
+                } else if (possuiEntrada && possuiSaida) {
+                    JOptionPane.showMessageDialog(frame, "Usuário já registrou entrada e saída.");
+                    return;
                 }
+
+                // Registrar o ponto
+                Ponto ponto = new Ponto(tipoPonto, dataHora, usuario);
+                pontos.add(ponto);
+                salvarPonto(ponto);
+
+                // Atualizar a exibição dos pontos registrados
+                atualizarExibicaoPontos(painelPontos);
             }
         });
 
@@ -138,8 +147,7 @@ public class PontoEletronico {
         painelBotoes.setLayout(new FlowLayout());
         painelBotoes.add(btnCadastrarUsuario);
         painelBotoes.add(btnDeletarUsuario);
-        painelBotoes.add(btnEntrada);
-        painelBotoes.add(btnSaida);
+        painelBotoes.add(btnRegistrar);
 
         // Adicionar os componentes ao frame
         frame.add(painelBotoes, BorderLayout.NORTH);
@@ -150,8 +158,19 @@ public class PontoEletronico {
     }
 
     public void cadastrarUsuario(String nomeUsuario, String matriculaUsuario) {
+        // Verificar se já existe um usuário com a mesma matrícula
+        boolean usuarioExistente = usuarios.stream()
+                .anyMatch(u -> u.getMatricula().equals(matriculaUsuario));
+
+        if (usuarioExistente) {
+            JOptionPane.showMessageDialog(null, "Já existe um usuário com a mesma matrícula.");
+            return;
+        }
+
+        // Cadastrar o usuário caso não exista um usuário com a mesma matrícula
         Usuario usuario = new Usuario(nomeUsuario, matriculaUsuario);
         usuarios.add(usuario);
+        JOptionPane.showMessageDialog(null, "Usuário cadastrado com sucesso!");
     }
 
     public void deletarUsuario(Usuario usuario) {
@@ -180,7 +199,43 @@ public class PontoEletronico {
         }
     }
 
-    public void registrarPonto(String tipo, String dataHora, Usuario usuario) {
+    public void registrarPonto(String tipo, String dataHora, String matriculaUsuario) {
+        Usuario usuarioEncontrado = null;
+        for (Usuario u : usuarios) {
+            if (u.getMatricula().equals(matriculaUsuario)) {
+                usuarioEncontrado = u;
+                break;
+            }
+        }
+
+        final Usuario usuario = usuarioEncontrado;
+
+        if (usuario == null) {
+            JOptionPane.showMessageDialog(null, "Usuário não encontrado.");
+            return;
+        }
+        boolean possuiPrimeiraEntrada = pontos.isEmpty();
+        boolean possuiSaidaAnterior = pontos.stream()
+                .anyMatch(ponto -> ponto.getUsuario().equals(usuario) && ponto.getTipo().equals("Saída"));
+        boolean possuiEntradaAnterior = pontos.stream()
+                .anyMatch(ponto -> ponto.getUsuario().equals(usuario) && ponto.getTipo().equals("Entrada"));
+
+        if (tipo.equals("Entrada")) {
+
+            if (!possuiSaidaAnterior && !possuiPrimeiraEntrada) {
+                JOptionPane.showMessageDialog(null,
+                        "Não é possível registrar uma entrada sem ter uma saída anterior.");
+                return;
+            }
+        } else if (tipo.equals("Saída")) {
+
+            if (possuiSaidaAnterior) {
+                JOptionPane.showMessageDialog(null,
+                        "Não é possível registrar uma saída sem ter uma entrada anterior.");
+                return;
+            }
+        }
+
         Ponto ponto = new Ponto(tipo, dataHora, usuario);
         pontos.add(ponto);
         salvarPonto(ponto);
