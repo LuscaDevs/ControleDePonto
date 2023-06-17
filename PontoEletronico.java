@@ -8,15 +8,18 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class PontoEletronico {
-    private List<Ponto> pontos;
-    private List<Usuario> usuarios;
+    private List<Ponto> pontos; // Lista de pontos registrados
+    private List<Usuario> usuarios; // Lista de usuários cadastrados
+    private int paresCount; // Contador de pares de entradas
 
     public PontoEletronico() {
         pontos = new ArrayList<>();
         usuarios = new ArrayList<>();
+        paresCount = 0;
     }
 
     public void exibirInterface() {
@@ -43,10 +46,12 @@ public class PontoEletronico {
 
         // Adicionar o painel de usuários à aba "Usuários cadastrados"
         tabbedPane.addTab("Usuários cadastrados", painelUsuarios);
+
         // Botão para cadastrar usuário
         JButton btnCadastrarUsuario = new JButton("Cadastrar Usuário");
         btnCadastrarUsuario.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // Solicitar nome do usuário
                 String nomeUsuario = JOptionPane.showInputDialog(frame, "Digite o nome do usuário:");
 
                 if (nomeUsuario == null || nomeUsuario.isBlank()) {
@@ -54,6 +59,7 @@ public class PontoEletronico {
                     return;
                 }
 
+                // Solicitar matrícula do usuário
                 String matriculaUsuario = JOptionPane.showInputDialog(frame, "Digite a matrícula do usuário:");
 
                 if (matriculaUsuario == null || matriculaUsuario.isBlank()) {
@@ -61,7 +67,9 @@ public class PontoEletronico {
                     return;
                 }
 
+                // Cadastrar o usuário
                 cadastrarUsuario(nomeUsuario, matriculaUsuario);
+                paresCount = 0; // Reiniciar o contador de pares
                 atualizarExibicaoUsuarios(painelUsuarios);
             }
 
@@ -72,15 +80,20 @@ public class PontoEletronico {
         btnDeletarUsuario.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (usuarios.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame,
-                            "Não há usuários cadastrados.");
+                    JOptionPane.showMessageDialog(frame, "Não há usuários cadastrados.");
                     return;
                 }
 
+                // Obter o usuário a ser deletado
                 Usuario usuarioSelecionado = obterUsuario();
+
+                // Remover os pontos que contêm o usuário a ser deletado
+                pontos.removeIf(ponto -> ponto.getUsuario() == usuarioSelecionado);
+
                 usuarios.remove(usuarioSelecionado);
                 JOptionPane.showMessageDialog(frame, "Usuário deletado com sucesso!");
                 atualizarExibicaoUsuarios(painelUsuarios);
+                atualizarExibicaoPontos(painelPontos, pontos);
             }
         });
 
@@ -92,7 +105,7 @@ public class PontoEletronico {
                 LocalDateTime dateTimeAtual = LocalDateTime.now();
                 String dataHora = dateTimeAtual.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
-                // Obter o usuário para registro do ponto
+                // Obter a matrícula do usuário para registro do ponto
                 String matriculaUsuario = JOptionPane.showInputDialog(frame, "Digite a matrícula do usuário:");
 
                 // Verificar se o usuário existe
@@ -127,8 +140,14 @@ public class PontoEletronico {
                     tipoPonto = "Entrada";
                 } else if (possuiEntrada && !possuiSaida) {
                     tipoPonto = "Saída";
-                } else if (possuiEntrada && possuiSaida) {
-                    JOptionPane.showMessageDialog(frame, "Usuário já registrou entrada e saída.");
+                } else if (possuiEntrada && possuiSaida && paresCount < 1) {
+                    tipoPonto = "Entrada"; // Permite cadastrar mais um par de entrada
+                    paresCount++; // Incrementa o contador de pares
+                } else if (paresCount == 1) {
+                    tipoPonto = "Saída";
+                    paresCount++; // Incrementa o contador de pares
+                } else {
+                    JOptionPane.showMessageDialog(frame, "O usuário já registrou o máximo de entradas permitidas.");
                     return;
                 }
 
@@ -138,7 +157,8 @@ public class PontoEletronico {
                 salvarPonto(ponto);
 
                 // Atualizar a exibição dos pontos registrados
-                atualizarExibicaoPontos(painelPontos);
+                atualizarExibicaoPontos(painelPontos, pontos);
+
             }
         });
 
@@ -174,6 +194,16 @@ public class PontoEletronico {
     }
 
     public void deletarUsuario(Usuario usuario) {
+        // Remover os pontos relacionados ao usuário
+        Iterator<Ponto> iterator = pontos.iterator();
+        while (iterator.hasNext()) {
+            Ponto ponto = iterator.next();
+            if (ponto.getUsuario() == usuario) {
+                iterator.remove();
+            }
+        }
+
+        // Remover o usuário
         usuarios.remove(usuario);
     }
 
@@ -199,51 +229,8 @@ public class PontoEletronico {
         }
     }
 
-    public void registrarPonto(String tipo, String dataHora, String matriculaUsuario) {
-        Usuario usuarioEncontrado = null;
-        for (Usuario u : usuarios) {
-            if (u.getMatricula().equals(matriculaUsuario)) {
-                usuarioEncontrado = u;
-                break;
-            }
-        }
-
-        final Usuario usuario = usuarioEncontrado;
-
-        if (usuario == null) {
-            JOptionPane.showMessageDialog(null, "Usuário não encontrado.");
-            return;
-        }
-        boolean possuiPrimeiraEntrada = pontos.isEmpty();
-        boolean possuiSaidaAnterior = pontos.stream()
-                .anyMatch(ponto -> ponto.getUsuario().equals(usuario) && ponto.getTipo().equals("Saída"));
-        boolean possuiEntradaAnterior = pontos.stream()
-                .anyMatch(ponto -> ponto.getUsuario().equals(usuario) && ponto.getTipo().equals("Entrada"));
-
-        if (tipo.equals("Entrada")) {
-
-            if (!possuiSaidaAnterior && !possuiPrimeiraEntrada) {
-                JOptionPane.showMessageDialog(null,
-                        "Não é possível registrar uma entrada sem ter uma saída anterior.");
-                return;
-            }
-        } else if (tipo.equals("Saída")) {
-
-            if (possuiSaidaAnterior) {
-                JOptionPane.showMessageDialog(null,
-                        "Não é possível registrar uma saída sem ter uma entrada anterior.");
-                return;
-            }
-        }
-
-        Ponto ponto = new Ponto(tipo, dataHora, usuario);
-        pontos.add(ponto);
-        salvarPonto(ponto);
-    }
-
-    public void atualizarExibicaoPontos(JPanel painelPontos) {
+    public void atualizarExibicaoPontos(JPanel painelPontos, List<Ponto> pontos) {
         painelPontos.removeAll();
-        List<Ponto> pontos = lerPontos();
         for (Ponto ponto : pontos) {
             painelPontos.add(new JLabel(ponto.getTipo() + " - " + ponto.getDataHora() + " - "
                     + ponto.getUsuario().getNome() + " (" + ponto.getUsuario().getMatricula() + ")"));
@@ -274,3 +261,46 @@ public class PontoEletronico {
     }
 
 }
+
+/*
+ * O código apresenta uma classe chamada "PontoEletronico" que implementa uma
+ * interface gráfica para controle de ponto eletrônico. Explicação passo a
+ * passo:
+ * 
+ * 1. Importações: São importadas as classes necessárias para a interface
+ * gráfica e manipulação de eventos.
+ * 
+ * 2. Definição da classe "PontoEletronico": A classe contém duas listas:
+ * "pontos" e "usuarios" para armazenar os pontos registrados e os usuários
+ * cadastrados, respectivamente.
+ * 
+ * 3. Método "exibirInterface": Este método cria a interface gráfica usando a
+ * biblioteca Swing. Ele cria uma janela principal, um painel para exibir os
+ * pontos registrados e um painel de abas com duas abas: "Pontos" e
+ * "Usuários cadastrados".
+ * 
+ * 4. Botão "Cadastrar Usuário": Este botão abre uma caixa de diálogo para o
+ * usuário inserir o nome e a matrícula do usuário a ser cadastrado. Em seguida,
+ * o método "cadastrarUsuario" é chamado para realizar o cadastro.
+ * 
+ * 5. Botão "Deletar usuário": Este botão abre uma caixa de diálogo com uma
+ * lista de usuários cadastrados. O usuário pode selecionar um usuário da lista
+ * para deletar. O método "deletarUsuario" é chamado para realizar a remoção.
+ * 
+ * 6. Botão "Registrar Ponto": Este botão registra o ponto de entrada ou saída
+ * para um usuário. Ele solicita a matrícula do usuário e verifica se o usuário
+ * existe na lista de usuários. Em seguida, verifica o tipo de ponto a ser
+ * registrado com base nos pontos já registrados para o usuário. Se o usuário
+ * não tiver nenhum ponto registrado, ele registra uma entrada. Se o usuário já
+ * tiver uma entrada registrada, ele registra uma saída. Se o usuário já tiver
+ * registrado tanto uma entrada quanto uma saída, uma mensagem de erro é
+ * exibida.
+ * 
+ * 7. Métodos auxiliares: Os métodos "cadastrarUsuario", "deletarUsuario",
+ * "atualizarExibicaoUsuarios", "obterUsuario", "registrarPonto",
+ * "atualizarExibicaoPontos", "lerPontos" e "salvarPonto" são métodos auxiliares
+ * para realizar as operações correspondentes.
+ * 
+ * 8. Finalmente, a classe "PontoEletronico" é instanciada e o método
+ * "exibirInterface" é chamado para iniciar a interface gráfica.
+ */

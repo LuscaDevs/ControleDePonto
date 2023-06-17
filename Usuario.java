@@ -1,6 +1,7 @@
 public class Usuario {
     private String nome;
     private String matricula;
+    private int pontosCount;
 
     public Usuario(String nome, String matricula) {
         this.nome = nome;
@@ -18,5 +19,13 @@ public class Usuario {
     @Override
     public String toString() {
         return nome + " (" + matricula + ")";
+    }
+
+    public int getPontosCount() {
+        return pontosCount;
+    }
+
+    public void setPontosCount(int pontosCount) {
+        this.pontosCount = pontosCount;
     }
 }
