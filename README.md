@@ -15,5 +15,4 @@ O projeto é dividido em algumas classes principais:
 - `Usuario`: Representa um usuário do sistema, contendo informações como nome, matrícula e contador de pontos.
 - `PontoEletronico`: Classe responsável por gerenciar os registros de pontos, verificando a consistência entre entradas e saídas.
 - `Ponto`: Representa um registro de ponto, contendo informações como usuário, tipo (entrada ou saída) e data/hora.
-- `TipoPonto`: Enumeração que define os tipos de ponto possíveis (entrada ou saída).
 
