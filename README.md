@@ -1,4 +1,4 @@
-Sistema de Ponto Eletrônico
+#Sistema de Ponto Eletrônico
 
 Este projeto consiste em um sistema de ponto eletrônico, onde os usuários podem realizar o registro de entradas e saídas em um ambiente de trabalho. O sistema foi desenvolvido em Java e oferece as seguintes funcionalidades:
 
