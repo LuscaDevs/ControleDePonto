@@ -14,12 +14,10 @@ import java.util.List;
 public class PontoEletronico {
     private List<Ponto> pontos; // Lista de pontos registrados
     private List<Usuario> usuarios; // Lista de usuários cadastrados
-    private int paresCount; // Contador de pares de entradas
 
     public PontoEletronico() {
         pontos = new ArrayList<>();
         usuarios = new ArrayList<>();
-        paresCount = 0;
     }
 
     public void exibirInterface() {
@@ -69,7 +67,6 @@ public class PontoEletronico {
 
                 // Cadastrar o usuário
                 cadastrarUsuario(nomeUsuario, matriculaUsuario);
-                paresCount = 0; // Reiniciar o contador de pares
                 atualizarExibicaoUsuarios(painelUsuarios);
             }
 
@@ -140,12 +137,12 @@ public class PontoEletronico {
                     tipoPonto = "Entrada";
                 } else if (possuiEntrada && !possuiSaida) {
                     tipoPonto = "Saída";
-                } else if (possuiEntrada && possuiSaida && paresCount < 1) {
+                } else if (possuiEntrada && possuiSaida && usuario.getParesCount() < 1) {
                     tipoPonto = "Entrada"; // Permite cadastrar mais um par de entrada
-                    paresCount++; // Incrementa o contador de pares
-                } else if (paresCount == 1) {
+                    usuario.increaseParesCount(); // Incrementa o contador de pares
+                } else if (usuario.getParesCount() == 1) {
                     tipoPonto = "Saída";
-                    paresCount++; // Incrementa o contador de pares
+                    usuario.increaseParesCount(); // Incrementa o contador de pares
                 } else {
                     JOptionPane.showMessageDialog(frame, "O usuário já registrou o máximo de entradas permitidas.");
                     return;

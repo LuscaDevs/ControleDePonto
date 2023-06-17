@@ -1,11 +1,12 @@
 public class Usuario {
     private String nome;
     private String matricula;
-    private int pontosCount;
+    private int paresCount;
 
     public Usuario(String nome, String matricula) {
         this.nome = nome;
         this.matricula = matricula;
+        this.paresCount = 0;
     }
 
     public String getNome() {
@@ -21,11 +22,11 @@ public class Usuario {
         return nome + " (" + matricula + ")";
     }
 
-    public int getPontosCount() {
-        return pontosCount;
+    public int getParesCount() {
+        return this.paresCount;
     }
 
-    public void setPontosCount(int pontosCount) {
-        this.pontosCount = pontosCount;
+    public void increaseParesCount() {
+        this.paresCount++;
     }
 }
