@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+//Ponto Eletrônico
 public class PontoEletronico {
     private List<Ponto> pontos; // Lista de pontos registrados
     private List<Usuario> usuarios; // Lista de usuários cadastrados
