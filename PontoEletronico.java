@@ -159,12 +159,49 @@ public class PontoEletronico {
             }
         });
 
+        // Botão para alterar usuário
+        JButton btnAlterarUsuario = new JButton("Alterar Usuário");
+        btnAlterarUsuario.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Obtém o usuário a ser alterado
+                Usuario usuarioSelecionado = obterUsuario();
+
+                if (usuarioSelecionado == null) {
+                    return; // Nenhum usuário selecionado
+                }
+
+                // Solicita os novos dados do usuário
+                String novoNomeUsuario = JOptionPane.showInputDialog(frame, "Digite o novo nome do usuário:",
+                        usuarioSelecionado.getNome());
+                String novaMatriculaUsuario = JOptionPane.showInputDialog(frame, "Digite a nova matrícula do usuário:",
+                        usuarioSelecionado.getMatricula());
+
+                if (novoNomeUsuario == null || novoNomeUsuario.isBlank() || novaMatriculaUsuario == null
+                        || novaMatriculaUsuario.isBlank()) {
+                    JOptionPane.showMessageDialog(frame, "Por favor, informe o nome e a matrícula do usuário.");
+                    return;
+                }
+
+                // Atualiza os dados do usuário
+                usuarioSelecionado.setNome(novoNomeUsuario);
+                usuarioSelecionado.setMatricula(novaMatriculaUsuario);
+
+                // Atualiza a exibição dos usuários
+                atualizarExibicaoUsuarios(painelUsuarios);
+                JOptionPane.showMessageDialog(null,
+                        "Usuário " + usuarioSelecionado.getNome() + " alterado com sucesso!");
+            }
+        });
+
+        // Adiciona o botão "Alterar Usuário" ao painel de botões
+
         // Adicionar os botões ao painel principal
         JPanel painelBotoes = new JPanel();
         painelBotoes.setLayout(new FlowLayout());
         painelBotoes.add(btnCadastrarUsuario);
         painelBotoes.add(btnDeletarUsuario);
         painelBotoes.add(btnRegistrar);
+        painelBotoes.add(btnAlterarUsuario);
 
         // Adicionar os componentes ao frame
         frame.add(painelBotoes, BorderLayout.NORTH);
