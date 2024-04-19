@@ -42,3 +42,16 @@ O sistema implementa operações de CRUD (Create, Read, Update, Delete) completa
 - Registro de Pontos: Permite que os usuários registrem suas entradas e saídas, garantindo a consistência dos dados.
 
 Este sistema oferece uma solução completa para o controle de ponto eletrônico, atendendo às necessidades de gerenciamento de usuários e registros de ponto de forma eficiente e confiável.
+
+## Divisão SCRUM
+- Product Owner: ANDRÊEI FERREIRA PESSOA DA SILVA - RA:12723128471
+- Scrum Master: LUCAS DOS SANTOS SILVA – RA: 1282314493
+- Devs: KETSA A DE AMAR SOUSA - RA: 32317601, LEANDRO AGUIAR - RA: 1272319129, MANOEL VINICIUS SILVA SOUZA - RA: 722315125, NATHAN ALMEIDA GOIS - RA: 722311425, PAULO SÉRGIO DOS ANJOS SILVA FILHO - RA: 722310346
+
+- Product Owner (PO): Responsável por representar os interesses dos stakeholders, definir as funcionalidades do produto e priorizar o backlog do produto com base no valor de negócio.
+- Scrum Master (SM): Responsável por garantir que a equipe de desenvolvimento siga os princípios e práticas do Scrum, remover impedimentos que estejam atrapalhando o progresso da equipe e facilitar as reuniões do Scrum.
+- Development Team (Devs): Responsável por transformar os itens do backlog do produto em incrementos potencialmente entregáveis do produto a cada sprint.
+
+A equipe de desenvolvimento consiste em cinco membros, conforme listado, liderados pelo Scrum Master. O Product Owner trabalhará em estreita colaboração com a equipe de desenvolvimento para garantir que as necessidades do cliente sejam atendidas e que o produto final seja entregue com sucesso. O Scrum Master estará presente para apoiar a equipe, facilitar os processos Scrum e remover quaisquer obstáculos que possam surgir durante o desenvolvimento.
+
+
